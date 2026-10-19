@@ -1,0 +1,1284 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>フォロワー×投票実測ログ</title>
+<meta name="description" content="ミス近畿大学2026 ファイナリストのフォロワー数とエール投票の推移">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230b57d0'/%3E%3Cpath d='M3 12l3-4 3 2 4-6' stroke='white' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
+
+<style>
+:root{
+  --paper:#eef0f3;
+  --surface:#ffffff;
+  --surface-2:#f5f6f8;
+  --ink:#14181f;
+  --muted:#4d5666;
+  --faint:#6b7482;
+  --line:#dce0e6;
+  --line-strong:#b9c0ca;
+  --accent:#0b57d0;
+  --accent-ink:#ffffff;
+  --accent-soft:#e6eefc;
+  --track:#edf0f4;
+  --up:#0b6e38;
+  --up-soft:#e3f3ea;
+  --down:#b3261e;
+  --gold:#a8791a;
+  --focus:#0b57d0;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0c1016;
+    --surface:#151a22;
+    --surface-2:#1d242e;
+    --ink:#e9eef6;
+    --muted:#aab5c4;
+    --faint:#8b97a8;
+    --line:#2a323d;
+    --line-strong:#3f4a59;
+    --accent:#83b4ff;
+    --accent-ink:#0a1a33;
+    --accent-soft:#17263e;
+    --track:#1f2731;
+    --up:#5fd39a;
+    --up-soft:#14301f;
+    --down:#ff9a90;
+    --gold:#e0b55c;
+    --focus:#83b4ff;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0c1016;
+  --surface:#151a22;
+  --surface-2:#1d242e;
+  --ink:#e9eef6;
+  --muted:#aab5c4;
+  --faint:#8b97a8;
+  --line:#2a323d;
+  --line-strong:#3f4a59;
+  --accent:#83b4ff;
+  --accent-ink:#0a1a33;
+  --accent-soft:#17263e;
+  --track:#1f2731;
+  --up:#5fd39a;
+  --up-soft:#14301f;
+  --down:#ff9a90;
+  --gold:#e0b55c;
+  --focus:#83b4ff;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN",system-ui,sans-serif;
+  font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%;
+}
+.wrap{
+  max-width:1000px;margin:0 auto;padding:0 0 80px;
+  background:var(--surface);min-height:100vh;
+  border-left:1px solid var(--line);border-right:1px solid var(--line);
+}
+
+/* header */
+.masthead{border-bottom:1px solid var(--line);padding:22px 20px 16px;display:flex;flex-direction:column;gap:3px}
+@media (max-width:640px){.masthead{padding:18px 12px 13px}}
+.org{font-size:13px;color:var(--muted);font-weight:500}
+h1{font-weight:900;font-size:clamp(21px,3.2vw,28px);line-height:1.2;margin:0;letter-spacing:-.01em}
+
+/* summary */
+.strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
+@media (max-width:720px){.strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.strip > div{background:var(--surface);padding:12px 20px 13px;display:flex;flex-direction:column;gap:1px}
+@media (max-width:640px){.strip > div{padding:10px 12px 11px}}
+.strip dt{font-size:12px;color:var(--faint);font-weight:500}
+.strip dd{margin:0;font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:600;font-size:21px;line-height:1.3;letter-spacing:-.01em}
+.strip .sub{font-size:12px;color:var(--muted)}
+
+/* body */
+.panel{padding:20px}
+@media (max-width:640px){.panel{padding:14px 12px 20px}}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:18px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips-sm{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.chips-sm .chip{padding:4px 11px;font-size:13px}
+.lab{font-size:12px;color:var(--faint);font-weight:500;margin-right:3px}
+.chip{
+  appearance:none;font:inherit;font-size:14px;font-weight:500;cursor:pointer;
+  border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);
+  padding:6px 14px;border-radius:4px;
+}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+button:focus-visible,[tabindex]:focus-visible,select:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.sel{appearance:none;font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;
+  border:1px solid var(--line-strong);border-radius:4px;padding:4px 26px 4px 10px;
+  background-color:var(--surface);
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 13px) 55%,calc(100% - 8px) 55%;background-size:5px 5px;background-repeat:no-repeat;
+  font-variant-numeric:tabular-nums}
+.sel:hover{border-color:var(--accent)}
+.asofnote{display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap;border:1px solid var(--line-strong);
+  border-left:4px solid var(--gold);background:var(--surface-2);border-radius:4px;padding:8px 12px;font-size:13.5px;margin:-4px 0 16px}
+.linkbtn{appearance:none;border:none;background:none;font:inherit;font-size:13px;font-weight:700;color:var(--accent);
+  cursor:pointer;padding:2px 4px;text-decoration:underline;text-underline-offset:3px}
+.custom{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 12px}
+
+.sec{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 10px}
+.sec h2{font-size:16px;font-weight:700;margin:0}
+.sec h3{font-size:14.5px;font-weight:700;margin:0}
+.note{font-size:12.5px;color:var(--muted)}
+.gap{height:26px}
+
+.chartbox{border:1px solid var(--line-strong);border-radius:4px;background:var(--surface);padding:10px 10px 4px;margin-bottom:26px}
+.chart{display:block;width:100%;height:auto;cursor:crosshair;touch-action:pan-y}
+
+/* table */
+.tablewrap{overflow-x:auto;border:1px solid var(--line-strong);border-radius:4px}
+table{border-collapse:collapse;width:100%;min-width:620px;table-layout:fixed}
+table.rank{min-width:700px}
+table.acct{min-width:640px}
+th,td{padding:9px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+thead th{font-size:12.5px;color:var(--muted);font-weight:700;background:var(--surface-2);
+  border-bottom:1px solid var(--line-strong)}
+th.name,td.name{text-align:left;font-weight:500;border-right:1px solid var(--line);overflow:hidden;text-overflow:ellipsis}
+th.lft,td.lft{text-align:left}
+td.spark{padding:4px 10px}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surface-2)}
+.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-weight:600;font-size:16px}
+.delta{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-weight:600;font-size:14px}
+.ratio{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--faint);margin-left:4px}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--faint)}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--up-soft)}
+.spark svg{display:block;width:100%;height:30px}
+.empty{padding:44px 16px;text-align:center;color:var(--muted);font-size:15px}
+.banner{border:1px solid var(--line-strong);border-left:4px solid var(--accent);background:var(--accent-soft);
+  border-radius:4px;padding:12px 15px;font-size:14px;margin:0 20px 18px}
+.foot{font-size:12.5px;color:var(--faint);margin:14px 2px 0}
+
+/* horizontal bars: 1色・細い・先端だけ丸める */
+.hbar{height:14px;background:var(--accent);border-radius:0 4px 4px 0;min-width:2px}
+td.barcell{padding:9px 14px 9px 12px}
+
+/* ranking */
+td.pos{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--muted);text-align:center}
+td.pos.medal{color:var(--gold);font-size:17px}
+td.detail{white-space:normal;text-align:left;padding:8px 12px}
+.rbar{display:flex;gap:2px;height:10px;min-width:3px}
+.rbar span{display:block;background:var(--accent)}
+.rbar span:nth-child(2){opacity:.6}
+.rbar span:nth-child(3){opacity:.32}
+.rbar span:last-child{border-radius:0 4px 4px 0}
+.rlegend{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.45}
+
+/* person view */
+.who{font-size:22px;font-weight:900;letter-spacing:-.01em;margin:4px 0 2px}
+.mini{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:10px}
+@media (max-width:640px){.mini{grid-template-columns:1fr}}
+.mini.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:760px){.mini.three{grid-template-columns:1fr}}
+.vbar{display:flex;height:12px;min-width:3px}
+.vbar span{display:block;height:100%}
+.vbar .vp{background:var(--accent)}
+.vbar .vf{background:var(--accent);opacity:.38;border-radius:0 4px 4px 0}
+.vlegend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:6px 2px 0}
+.vlegend i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;background:var(--accent)}
+.vlegend i.f{opacity:.38}
+.minicard{border:1px solid var(--line-strong);border-radius:4px;padding:10px 12px 4px}
+.minihead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.minihead .t{font-size:13px;font-weight:700;color:var(--muted)}
+.minihead .v{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:18px}
+.minisub{font-size:12px;color:var(--muted);min-height:18px}
+
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.grid{grid-template-columns:1fr}}
+.card{appearance:none;font:inherit;color:inherit;text-align:left;cursor:pointer;
+  border:1px solid var(--line-strong);border-radius:4px;background:var(--surface);padding:11px 12px 10px}
+.card:hover{border-color:var(--accent)}
+.card[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.card .cn{font-weight:700;font-size:14px;margin-bottom:7px;display:flex;justify-content:space-between;gap:6px}
+.card .cn span{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--muted);font-size:13px}
+.crow{display:grid;grid-template-columns:62px 1fr 56px;align-items:center;gap:8px;height:20px}
+.crow .l{font-size:11.5px;color:var(--muted)}
+.crow .b{height:10px;background:var(--accent);border-radius:0 4px 4px 0;min-width:2px}
+.crow .n{font-family:"IBM Plex Mono",monospace;font-size:12px;text-align:right;color:var(--ink)}
+
+details.tbl{margin:4px 0 22px}
+details.tbl summary{cursor:pointer;font-size:13px;color:var(--accent);font-weight:500;padding:4px 0}
+details.tbl .tablewrap{margin-top:8px;max-height:360px;overflow:auto}
+details.tbl table{min-width:420px}
+details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
+
+/* tooltip: 値が主、ラベルが従 */
+.tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--surface);
+  padding:7px 10px;border-radius:4px;font-size:12px;line-height:1.4;max-width:240px}
+.tip strong{display:block;font-family:"IBM Plex Mono",monospace;font-size:15px;font-weight:600}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <span class="org">ミス近畿大学 2026 ファイナリスト ／ 現在順位・エール投票・フォロワー</span>
+    <h1>フォロワー×投票実測ログ</h1>
+    <span class="org" id="updated"></span>
+  </header>
+  <dl class="strip" id="strip"></dl>
+  <div class="panel" id="panel"><div class="empty">読み込み中…</div></div>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* お披露目の日。違っていたらここだけ直す */
+  var DEBUT = "2026-09-15";
+
+  var PLATFORMS = [
+    { key: "all",       label: "全体" },
+    { key: "instagram", label: "Instagram" },
+    { key: "threads",   label: "Threads" },
+    { key: "tiktok",    label: "TikTok" },
+    { key: "x",         label: "X" }
+  ];
+  var KEYS = ["instagram", "threads", "tiktok", "x"];
+  var PLABEL = { instagram: "Instagram", threads: "Threads", tiktok: "TikTok", x: "X" };
+
+  var VIEWS = [
+    { key: "trend",  label: "推移" },
+    { key: "rank",   label: "ランキング" },
+    { key: "person", label: "個人" }
+  ];
+  var SECTIONS = [
+    { key: "total",    label: "現在順位" },
+    { key: "vote",     label: "エール投票" },
+    { key: "follower", label: "フォロワー" }
+  ];
+  var VOTE_END = "2026-10-13";
+  var RANGES = [
+    { key: "3d",  label: "3日",   days: 3 },
+    { key: "7d",  label: "1週間", days: 7 },
+    { key: "30d", label: "1ヶ月", days: 30 },
+    { key: "all", label: "全期間", days: 0 },
+    { key: "custom", label: "期間指定", days: 0 }
+  ];
+  var CMPS = [
+    { key: "3d",  label: "3日前",   days: 3 },
+    { key: "7d",  label: "1週間前", days: 7 },
+    { key: "30d", label: "1ヶ月前", days: 30 }
+  ];
+
+  var state = { ready: false, error: null, config: null, snaps: [], votes: [],
+                view: "trend", section: "total", vperson: "", vkind: "pt", platform: "all", range: "all", cmp: "7d", person: "", cache: {},
+                asof: "", from: "" };   /* asof・from はその場だけ（保存しない） */
+  var PREF_KEYS = ["section", "vperson", "vkind", "view", "platform", "range", "cmp", "person"];
+  try {
+    var saved = JSON.parse(localStorage.getItem("fl-prefs") || "{}");
+    PREF_KEYS.forEach(function (k) { if (typeof saved[k] === "string") state[k] = saved[k]; });
+  } catch (e) {}
+  function savePrefs() {
+    try {
+      var o = {};
+      PREF_KEYS.forEach(function (k) { o[k] = state[k]; });
+      localStorage.setItem("fl-prefs", JSON.stringify(o));
+    } catch (e) {}
+  }
+
+  var panel = document.getElementById("panel");
+  var stripEl = document.getElementById("strip");
+  var tipEl = document.getElementById("tip");
+  var charts = {}, chartSeq = 0;
+
+  /* ---------- helpers ---------- */
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function nfmt(n) {
+    return (typeof n === "number" && isFinite(n)) ? n.toLocaleString("ja-JP") : "—";
+  }
+  function members() {
+    return (state.config && Array.isArray(state.config.members)) ? state.config.members : [];
+  }
+  /** 公式アカウントを除いた、競い合う対象 */
+  function finalists() {
+    return members().filter(function (m) { return m.indexOf("公式") !== 0; });
+  }
+  function dayOf(measuredAt) { return String(measuredAt || "").slice(0, 10); }
+  function dayLabel(d) {
+    var str = String(d || "");
+    var p = str.slice(0, 10).split("-");
+    if (p.length !== 3) return d;
+    return Number(p[1]) + "/" + Number(p[2]) + (str.length > 10 ? " " + str.slice(11, 16) : "");
+  }
+  function cmpDef() {
+    return CMPS.filter(function (c) { return c.key === state.cmp; })[0] || CMPS[1];
+  }
+
+  /** 計測ごとの生の値（無ければ null） */
+  function raw(snap, member, platform) {
+    var v = snap && snap.values && snap.values[member];
+    if (!v) return null;
+    if (platform !== "all") {
+      var n = v[platform];
+      return (typeof n === "number" && isFinite(n)) ? n : null;
+    }
+    var sum = null;
+    KEYS.forEach(function (k) {
+      var x = v[k];
+      if (typeof x === "number" && isFinite(x)) sum = (sum === null ? 0 : sum) + x;
+    });
+    return sum;
+  }
+
+  /**
+   * 日ごとの「その日の終わり時点で分かっている値」の配列。
+   * 1回の送信に1人分しか入っていないので、直近の既知値を持ち越して数える。
+   */
+  function seriesFor(member, platform) {
+    var key = member + " " + platform;
+    if (state.cache[key]) return state.cache[key];
+
+    var out;
+    if (platform === "all") {
+      var parts = KEYS.map(function (k) { return seriesFor(member, k); });
+      out = state.days.map(function (d, i) {
+        var sum = null;
+        parts.forEach(function (p) { if (p[i] !== null) sum = (sum === null ? 0 : sum) + p[i]; });
+        return sum;
+      });
+    } else {
+      out = [];
+      var last = null;
+      for (var i = 0; i < state.days.length; i++) {
+        var arr = state.byDay[state.days[i]];
+        for (var j = 0; j < arr.length; j++) {
+          var v = raw(arr[j], member, platform);
+          if (v !== null) last = v;
+        }
+        out.push(last);
+      }
+    }
+    state.cache[key] = out;
+    return out;
+  }
+
+  /** その日時点の上位3アカウントの合計。データが3つ未満なら、ある分だけ足す */
+  function top3At(member, idx) {
+    if (idx < 0) return null;
+    var arr = [];
+    KEYS.forEach(function (k) {
+      var v = seriesFor(member, k)[idx];
+      if (v !== null) arr.push({ k: k, v: v });
+    });
+    if (!arr.length) return null;
+    arr.sort(function (a, b) { return b.v - a.v; });
+    var used = arr.slice(0, 3), total = 0;
+    used.forEach(function (o) { total += o.v; });
+    return { total: total, used: used, available: arr.length };
+  }
+
+  function ymd(d) {
+    return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+  }
+
+  /** 基準日の index。未指定や見つからないときは最新の計測日 */
+  function lastIdx() {
+    var days = state.days;
+    if (!days.length) return -1;
+    if (state.asof) { var i = days.indexOf(state.asof); if (i >= 0) return i; }
+    return days.length - 1;
+  }
+  function isLatest() { return lastIdx() === state.days.length - 1; }
+  /** 表の見出し用：「最新」または「10/3時点」 */
+  function nowLabel() { return isLatest() ? "最新" : dayLabel(state.days[lastIdx()]) + "時点"; }
+
+  /** 選択中の表示期間に入る days の開始 index（終わりは基準日） */
+  function rangeStart() {
+    var days = state.days, L = lastIdx();
+    if (L < 0) return 0;
+    if (state.range === "custom") {
+      if (!state.from) return 0;
+      for (var j = 0; j <= L; j++) if (days[j] >= state.from) return j;
+      return L;
+    }
+    var r = RANGES.filter(function (x) { return x.key === state.range; })[0];
+    if (!r || !r.days) return 0;
+    var t = new Date(days[L] + "T00:00:00");
+    t.setDate(t.getDate() - (r.days - 1));
+    var target = ymd(t);
+    for (var i = 0; i <= L; i++) if (days[i] >= target) return i;
+    return L;
+  }
+
+  /** お披露目の日以降が始まる days の index（基準日より後にはしない） */
+  function debutStart() {
+    var L = Math.max(lastIdx(), 0);
+    for (var i = 0; i <= L; i++) if (state.days[i] >= DEBUT) return i;
+    return L;
+  }
+
+  /** 基準日から n 日前。それ以前で最後に計測した日の index（無ければ -1） */
+  function agoIndex(n) {
+    var days = state.days, L = lastIdx();
+    if (L < 1) return -1;
+    var t = new Date(days[L] + "T00:00:00");
+    t.setDate(t.getDate() - n);
+    var target = ymd(t);
+    for (var i = L - 1; i >= 0; i--) if (days[i] <= target) return i;
+    return -1;
+  }
+
+  /** 計測日の <select>。newestFirst で新しい日を上に */
+  function dayOptions(fromIdx, toIdx, selected, latestLabel) {
+    var o = "";
+    for (var i = toIdx; i >= fromIdx; i--) {
+      var d = state.days[i];
+      var isLast = (i === state.days.length - 1);
+      var val = (latestLabel && isLast) ? "" : d;
+      var lab = dayLabel(d) + (isLast ? "（最新）" : "");
+      o += '<option value="' + esc(val) + '"' + (val === selected ? " selected" : "") + ">" + esc(lab) + "</option>";
+    }
+    return o;
+  }
+
+  function firstKnown(arr) {
+    for (var i = 0; i < arr.length; i++) if (arr[i] !== null) return arr[i];
+    return null;
+  }
+
+  function deltaHTML(d, cls) {
+    if (d === null) return '<span class="delta flat">—</span>';
+    if (d === 0) return '<span class="delta flat">±0</span>';
+    var c = d > 0 ? "up" : "down";
+    var body = (d > 0 ? "+" : "−") + nfmt(Math.abs(d));
+    return '<span class="delta ' + c + '">' + (cls === "pill" && d > 0 ? '<span class="pill">' + body + "</span>" : body) + "</span>";
+  }
+
+  /* ---------- tooltip ---------- */
+
+  function showTip(x, y, value, label) {
+    tipEl.textContent = "";
+    var s = document.createElement("strong");
+    s.textContent = value;
+    var l = document.createElement("span");
+    l.textContent = label;
+    tipEl.appendChild(s);
+    tipEl.appendChild(l);
+    tipEl.hidden = false;
+    var r = tipEl.getBoundingClientRect();
+    var left = Math.min(Math.max(8, x + 14), window.innerWidth - r.width - 8);
+    var top = y - r.height - 12;
+    if (top < 8) top = y + 16;
+    tipEl.style.left = left + "px";
+    tipEl.style.top = top + "px";
+  }
+  function hideTip() { tipEl.hidden = true; }
+
+  /* ---------- summary ---------- */
+
+  function renderStrip() {
+    var days = state.days;
+    if (!days.length) { stripEl.innerHTML = ""; return; }
+    var last = lastIdx();
+    var prev = last - 1;
+    var cd = cmpDef();
+    var ago = agoIndex(cd.days);
+
+    var totalNow = 0, totalPrev = 0, totalAgo = 0;
+    var anyPrev = prev >= 0, anyAgo = ago >= 0;
+    members().forEach(function (m) {
+      var s = seriesFor(m, "all");
+      if (s[last] !== null) totalNow += s[last];
+      if (anyPrev && s[prev] !== null) totalPrev += s[prev];
+      if (anyAgo && s[ago] !== null) totalAgo += s[ago];
+    });
+
+    var dayDiff = anyPrev ? totalNow - totalPrev : null;
+    var agoDiff = anyAgo ? totalNow - totalAgo : null;
+
+    var dayArr = state.byDay[days[last]] || [];
+    var lastSnap = dayArr[dayArr.length - 1] || state.snaps[state.snaps.length - 1];
+    var upto = state.snaps.filter(function (sn) { return dayOf(sn.measuredAt) <= days[last]; }).length;
+    var cells = [
+      [isLatest() ? "最新の計測" : "基準日の計測", (lastSnap.measuredAt || "").replace("T", " "),
+        "計測 " + upto + " 回 ／ " + (last + 1) + " 日分"],
+      ["合計フォロワー", nfmt(totalNow), "全SNS・" + members().length + "アカウント"],
+      ["前日比", dayDiff === null ? "—" : (dayDiff >= 0 ? "+" : "−") + nfmt(Math.abs(dayDiff)),
+        anyPrev ? dayLabel(days[prev]) + " → " + dayLabel(days[last]) : "比較できる前日がありません"],
+      [cd.label + "から", agoDiff === null ? "—" : (agoDiff >= 0 ? "+" : "−") + nfmt(Math.abs(agoDiff)),
+        anyAgo ? dayLabel(days[ago]) + " → " + dayLabel(days[last]) : cd.label + "のデータがまだありません"]
+    ];
+    stripEl.innerHTML = cells.map(function (c) {
+      return "<div><dt>" + esc(c[0]) + "</dt><dd>" + esc(c[1]) + '</dd><span class="sub">' + esc(c[2]) + "</span></div>";
+    }).join("");
+  }
+
+  /* ---------- charts ---------- */
+
+  /**
+   * 折れ線（1系列）。o = { W, H, label, endLabel }
+   * ホバー用に登録しておき、描画後に attachHovers() がつなぐ。
+   */
+  function lineChart(days, values, o) {
+    o = o || {};
+    var W = o.W || 720, H = o.H || 240;
+    var PL = o.PL || 62, PR = o.PR || 14, PT = o.PT || 16, PB = o.PB || 30;
+    var fs = o.small ? 11 : 12;
+    var id = "c" + (++chartSeq);
+    var pts = [];
+    values.forEach(function (v, i) { if (v !== null) pts.push([i, v]); });
+    if (pts.length === 0) {
+      return '<svg class="chart" viewBox="0 0 ' + W + " " + H + '" aria-hidden="true">' +
+             '<text x="' + (W / 2) + '" y="' + (H / 2) + '" text-anchor="middle" font-size="' + fs +
+             '" fill="var(--faint)">まだデータがありません</text></svg>';
+    }
+
+    var max = 0;
+    pts.forEach(function (p) { if (p[1] > max) max = p[1]; });
+    var step = Math.pow(10, Math.max(0, String(Math.round(max)).length - 2));
+    var top = Math.max(step, Math.ceil(max / step) * step);
+
+    var x = function (i) { return days.length < 2 ? (PL + (W - PL - PR) / 2) : PL + (i / (days.length - 1)) * (W - PL - PR); };
+    var y = function (v) { return PT + (1 - v / top) * (H - PT - PB); };
+
+    var g = "";
+    [0, 0.5, 1].forEach(function (f) {
+      var val = top * f, yy = y(val);
+      g += '<line x1="' + PL + '" y1="' + yy.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + yy.toFixed(1) +
+           '" stroke="var(--line)" stroke-width="1" fill="none"/>' +
+           '<text x="' + (PL - 8) + '" y="' + (yy + 4).toFixed(1) + '" text-anchor="end" font-size="' + fs + '" ' +
+           'font-family="IBM Plex Mono, monospace" fill="var(--faint)">' + nfmt(Math.round(val)) + "</text>";
+    });
+
+    var d = pts.map(function (p, i) { return (i ? "L" : "M") + x(p[0]).toFixed(1) + " " + y(p[1]).toFixed(1); }).join(" ");
+    var area = d + " L" + x(pts[pts.length - 1][0]).toFixed(1) + " " + y(0).toFixed(1) +
+               " L" + x(pts[0][0]).toFixed(1) + " " + y(0).toFixed(1) + " Z";
+
+    var labels = "";
+    var every = o.small ? 99999 : Math.ceil(days.length / 6);
+    days.forEach(function (dd, i) {
+      var isEnd = (i === 0 || i === days.length - 1);
+      if (!isEnd && (days.length <= 6 ? false : i % every !== 0)) return;
+      if (o.small && !isEnd) return;
+      var anchor = o.small ? (i === 0 ? "start" : "end") : "middle";
+      labels += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 9) + '" text-anchor="' + anchor + '" font-size="' + fs + '" ' +
+                'fill="var(--faint)">' + esc(dayLabel(dd)) + "</text>";
+    });
+
+    var lastPt = pts[pts.length - 1];
+    var lx = x(lastPt[0]), ly = y(lastPt[1]);
+    var endLbl = "";
+    if (o.endLabel) {
+      var ty = (ly - 12 < PT + 4) ? ly + 20 : ly - 12;
+      endLbl = '<text x="' + (lx - 8).toFixed(1) + '" y="' + ty.toFixed(1) + '" text-anchor="end" font-size="13" ' +
+               'font-family="IBM Plex Mono, monospace" font-weight="600" fill="var(--ink)">' + nfmt(lastPt[1]) + "</text>";
+    }
+
+    charts[id] = { days: days, values: values, W: W, x: x, y: y, PL: PL, PR: PR, label: o.label || "" };
+
+    return '<svg class="chart" viewBox="0 0 ' + W + " " + H + '" data-chart="' + id + '" tabindex="0" role="img" aria-label="' +
+      esc((o.label || "") + "の推移") + '">' + g +
+      '<path d="' + area + '" fill="var(--accent)" fill-opacity=".10" stroke="none"/>' +
+      '<path d="' + d + '" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' +
+      '<line class="xh" x1="0" y1="' + PT + '" x2="0" y2="' + (H - PB) + '" stroke="var(--line-strong)" stroke-width="1" visibility="hidden"/>' +
+      '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>' +
+      '<circle class="xd" cx="0" cy="0" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/>' +
+      endLbl + labels + "</svg>";
+  }
+
+  /** 十字線＋ツールチップ。キーボードでも左右キーで動かせる */
+  function attachHovers() {
+    panel.querySelectorAll("svg[data-chart]").forEach(function (svg) {
+      var c = charts[svg.getAttribute("data-chart")];
+      if (!c) return;
+      var xh = svg.querySelector(".xh"), xd = svg.querySelector(".xd");
+      var n = c.days.length, cur = -1;
+
+      function nearest(i) {
+        if (c.values[i] !== null) return i;
+        for (var k = 1; k < n; k++) {
+          if (i - k >= 0 && c.values[i - k] !== null) return i - k;
+          if (i + k < n && c.values[i + k] !== null) return i + k;
+        }
+        return -1;
+      }
+      function show(i) {
+        i = nearest(Math.max(0, Math.min(n - 1, i)));
+        if (i < 0) return;
+        cur = i;
+        var v = c.values[i], px = c.x(i), py = c.y(v);
+        xh.setAttribute("x1", px); xh.setAttribute("x2", px); xh.setAttribute("visibility", "visible");
+        xd.setAttribute("cx", px); xd.setAttribute("cy", py); xd.setAttribute("visibility", "visible");
+        var r = svg.getBoundingClientRect(), s = r.width / c.W;
+        showTip(r.left + px * s, r.top + py * s, nfmt(v), dayLabel(c.days[i]) + "　" + c.label);
+      }
+      function hide() {
+        xh.setAttribute("visibility", "hidden"); xd.setAttribute("visibility", "hidden");
+        hideTip();
+      }
+      svg.addEventListener("pointermove", function (e) {
+        var r = svg.getBoundingClientRect();
+        var vx = (e.clientX - r.left) / r.width * c.W;
+        var f = n < 2 ? 0 : (vx - c.PL) / (c.W - c.PL - c.PR);
+        show(Math.round(f * (n - 1)));
+      });
+      svg.addEventListener("pointerleave", hide);
+      svg.addEventListener("focus", function () { show(n - 1); });
+      svg.addEventListener("blur", hide);
+      svg.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowLeft")  { e.preventDefault(); show(cur - 1); }
+        if (e.key === "ArrowRight") { e.preventDefault(); show(cur + 1); }
+      });
+    });
+
+    panel.querySelectorAll("[data-tipv]").forEach(function (el) {
+      el.addEventListener("pointermove", function (e) {
+        showTip(e.clientX, e.clientY, el.getAttribute("data-tipv"), el.getAttribute("data-tipl"));
+      });
+      el.addEventListener("pointerleave", hideTip);
+    });
+  }
+
+  function sparkline(values) {
+    var pts = [];
+    values.forEach(function (v, i) { if (v !== null) pts.push([i, v]); });
+    var W = 160, H = 30, P = 3;
+    if (pts.length < 2) {
+      return '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none" aria-hidden="true">' +
+             '<line x1="0" y1="' + (H - P) + '" x2="' + W + '" y2="' + (H - P) +
+             '" stroke="var(--line)" stroke-width="1"/></svg>';
+    }
+    var vs = pts.map(function (p) { return p[1]; });
+    var min = Math.min.apply(null, vs), max = Math.max.apply(null, vs);
+    var span = (max - min) || 1;
+    var n = values.length - 1 || 1;
+    var xy = pts.map(function (p) {
+      return [(p[0] / n) * W, P + (1 - (p[1] - min) / span) * (H - P * 2)];
+    });
+    var d = xy.map(function (c, i) { return (i ? "L" : "M") + c[0].toFixed(1) + " " + c[1].toFixed(1); }).join(" ");
+    var last = xy[xy.length - 1];
+    return '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none" aria-hidden="true">' +
+      '<path d="' + d + " L" + W + " " + H + " L0 " + H + ' Z" fill="var(--accent)" fill-opacity=".10" stroke="none"/>' +
+      '<path d="' + d + '" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linejoin="round" ' +
+      'stroke-linecap="round" vector-effect="non-scaling-stroke"/>' +
+      '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) +
+      '" r="2.6" fill="var(--accent)" stroke="var(--surface)" stroke-width="1"/></svg>';
+  }
+
+  /* ---------- 推移ビュー ---------- */
+
+  function renderTrend() {
+    var pk = state.platform;
+    var pl = PLATFORMS.filter(function (p) { return p.key === pk; })[0] || PLATFORMS[0];
+    var days = state.days, last = lastIdx(), prev = last - 1;
+    var cd = cmpDef(), ago = agoIndex(cd.days);
+
+    var h = '<div class="bar" id="platbar">' + PLATFORMS.map(function (p) {
+      return '<button type="button" class="chip" data-p="' + p.key + '" aria-pressed="' + (p.key === pl.key) + '">' +
+             esc(p.label) + "</button>";
+    }).join("") + "</div>";
+
+    var memberSeries = members().map(function (m) { return seriesFor(m, pl.key); });
+    var totals = days.map(function (d, i) {
+      var t = null;
+      memberSeries.forEach(function (s) { if (s[i] !== null) t = (t === null ? 0 : t) + s[i]; });
+      return t;
+    });
+    var s0 = rangeStart();
+    var vDays = days.slice(s0, last + 1), vTotals = totals.slice(s0, last + 1);
+    var custom = state.range === "custom";
+
+    h += '<div class="sec"><h2>' + esc(pl.label) + ' 合計の推移</h2>' +
+         '<div class="chips-sm" id="rangebar"><span class="lab">表示期間</span>' + RANGES.map(function (r) {
+           return '<button type="button" class="chip" data-r="' + r.key + '" aria-pressed="' +
+                  (r.key === state.range) + '">' + esc(r.label) + "</button>";
+         }).join("") + "</div></div>";
+    if (custom) {
+      h += '<div class="custom"><label class="lab" for="fromSel">開始</label>' +
+           '<select class="sel" id="fromSel">' + dayOptions(0, last, days[s0], false) + "</select>" +
+           '<label class="lab" for="toSel">〜 終了</label>' +
+           '<select class="sel" id="toSel">' + dayOptions(s0, days.length - 1, state.asof, true) + "</select></div>";
+    }
+    var tFirst = firstKnown(vTotals), tLast = vTotals[vTotals.length - 1];
+    var periodGain = (tFirst !== null && tLast !== null && vDays.length > 1) ? tLast - tFirst : null;
+    h += '<div class="chartbox">' + lineChart(vDays, vTotals, { label: pl.label + " 合計", endLabel: true }) + "</div>";
+    h += '<p class="note" style="margin:-18px 2px 8px">' +
+         esc(dayLabel(vDays[0])) + " 〜 " + esc(dayLabel(vDays[vDays.length - 1])) +
+         "（" + vDays.length + "日分）／ 全員の合計" +
+         (periodGain === null ? "" : "　期間の増加 " + deltaHTML(periodGain)) + "</p>";
+    h += '<details class="tbl"><summary>数値を表で見る</summary><div class="tablewrap"><table>' +
+         '<thead><tr><th class="lft">日付</th><th>' + esc(pl.label) + ' 合計</th></tr></thead><tbody>' +
+         vDays.map(function (d, i) {
+           return '<tr><td class="lft">' + esc(dayLabel(d)) + '</td><td class="num">' + nfmt(vTotals[i]) + "</td></tr>";
+         }).reverse().join("") + "</tbody></table></div></details>";
+
+    var rows = members().map(function (m) {
+      var s = seriesFor(m, pl.key);
+      var now = s[last];
+      var pv = prev >= 0 ? s[prev] : null;
+      var av = ago >= 0 ? s[ago] : null;
+      var fv = s[s0];
+      return {
+        m: m, s: s, now: now,
+        day: (now !== null && pv !== null) ? now - pv : null,
+        gain: (now !== null && av !== null) ? now - av : null,
+        period: (now !== null && fv !== null && s0 < last) ? now - fv : null
+      };
+    });
+    rows.sort(function (a, b) { return (b.now === null ? -1 : b.now) - (a.now === null ? -1 : a.now); });
+
+    h += '<div class="sec"><h2>アカウント別</h2><span class="note">' + esc(nowLabel()) + 'の数字が多い順</span></div>';
+    h += '<div class="tablewrap"><table' + (custom ? ' style="min-width:740px"' : "") + '>' +
+         '<colgroup><col style="width:132px"><col><col style="width:104px"><col style="width:116px"><col style="width:120px">' +
+         (custom ? '<col style="width:120px">' : "") + '</colgroup>' +
+         '<thead><tr><th class="name">アカウント</th><th></th><th>' + esc(nowLabel()) + '</th><th>前日比</th><th>' +
+         esc(cd.label) + 'から</th>' + (custom ? "<th>" + esc(dayLabel(days[s0])) + "から</th>" : "") +
+         '</tr></thead><tbody>';
+    rows.forEach(function (r) {
+      h += '<tr><td class="name">' + esc(r.m) + "</td>" +
+           '<td class="spark">' + sparkline(r.s.slice(s0, last + 1)) + "</td>" +
+           '<td class="num">' + nfmt(r.now) + "</td>" +
+           "<td>" + deltaHTML(r.day, "pill") + "</td>" +
+           "<td>" + deltaHTML(r.gain) + "</td>" +
+           (custom ? "<td>" + deltaHTML(r.period) + "</td>" : "") + "</tr>";
+    });
+    h += "</tbody></table></div>";
+
+    h += '<p class="foot">前日比は' + (isLatest() ? "最新の計測日" : "基準日") + '（' + esc(dayLabel(days[last])) + '）と、その直前に計測した日' +
+         (prev >= 0 ? "（" + esc(dayLabel(days[prev])) + "）" : "") + 'を比べた差。' +
+         esc(cd.label) + 'からは' +
+         (ago >= 0 ? esc(dayLabel(days[ago])) + " からの増加" : "、データが揃うと表示されます") +
+         '。数字はフォームと公式スプレッドシートから自動で反映されます。</p>';
+    return h;
+  }
+
+  /* ---------- 投票・総合 共通 ---------- */
+
+  function latestVote() { return state.votes.length ? state.votes[state.votes.length - 1] : null; }
+  function prevVote() { return state.votes.length > 1 ? state.votes[state.votes.length - 2] : null; }
+
+  /** idx 日時点のフォロワー順位（上位3アカウント合計）。{name: 順位} */
+  function followerRanks(idx) {
+    var rows = finalists().map(function (m) {
+      var t = top3At(m, idx);
+      return { m: m, total: t ? t.total : null };
+    });
+    rows.sort(function (a, b) { return (b.total === null ? -1 : b.total) - (a.total === null ? -1 : a.total); });
+    var out = {};
+    rows.forEach(function (r, i) { out[r.m] = { pos: i + 1, total: r.total }; });
+    return out;
+  }
+
+  /** 総合：エール順位＋フォロワー順位の合計。少ない人が上位。同点は同順位 */
+  function compositeRows(vote, idx) {
+    var fr = followerRanks(idx);
+    var rows = finalists().map(function (m) {
+      var v = vote && vote.ranks[m], f = fr[m];
+      var vr = v ? v.rank : null, fp = f ? f.pos : null;
+      return { m: m, vr: vr, fr: fp, score: (vr !== null && fp !== null) ? vr + fp : null,
+               pt: v ? v.pt : null, ft: f ? f.total : null };
+    });
+    rows.sort(function (a, b) {
+      var sa = a.score === null ? 99 : a.score, sb = b.score === null ? 99 : b.score;
+      return sa - sb || (a.vr || 99) - (b.vr || 99) || (a.fr || 99) - (b.fr || 99);
+    });
+    rows.forEach(function (r, i) {
+      r.pos = i === 0 ? 1 : (r.score === rows[i - 1].score ? rows[i - 1].pos : i + 1);
+    });
+    return rows;
+  }
+
+  function rankMove(d) {
+    if (d === null || d === undefined) return '<span class="delta flat">—</span>';
+    if (d === 0) return '<span class="delta flat">→</span>';
+    return '<span class="delta ' + (d > 0 ? "up" : "down") + '">' + (d > 0 ? "▲" : "▼") + Math.abs(d) + "</span>";
+  }
+
+  function renderVoteStrip() {
+    var cur = latestVote();
+    if (!cur) { stripEl.innerHTML = ""; return; }
+    var last = state.days.length - 1;
+    var comp = compositeRows(cur, last);
+    var top = comp[0];
+    var vtop = finalists().slice().sort(function (a, b) {
+      return ((cur.ranks[a] || {}).rank || 99) - ((cur.ranks[b] || {}).rank || 99);
+    })[0];
+    var t = new Date(VOTE_END + "T23:59:59"), left = Math.ceil((t - new Date()) / 86400000);
+    var cells = [
+      ["最新のエール投票取得", cur.measuredAt.replace("T", " "), "取得 " + state.votes.length + " 回"],
+      ["現在順位 1位", top ? top.m : "—", top && top.score !== null ? "合計 " + top.score + " 点（少ないほど上位）" : ""],
+      ["エール投票 1位", vtop || "—", vtop ? nfmt(cur.ranks[vtop].pt) + " PT" : ""],
+      ["投票終了まで", left > 0 ? left + " 日" : "終了", dayLabel(VOTE_END) + " まで"]
+    ];
+    stripEl.innerHTML = cells.map(function (c) {
+      return "<div><dt>" + esc(c[0]) + "</dt><dd style=\"font-size:" + (c[1].length > 8 ? 17 : 21) + "px\">" + esc(c[1]) +
+             '</dd><span class="sub">' + esc(c[2]) + "</span></div>";
+    }).join("");
+  }
+
+  /* ---------- 現在順位ビュー ---------- */
+
+  function renderTotal() {
+    var cur = latestVote();
+    if (!cur) return '<div class="empty">まだエール投票のデータがありません。</div>';
+    var prv = prevVote(), last = state.days.length - 1;
+    var rows = compositeRows(cur, last);
+    var prevPos = {};
+    if (prv && last > 0) compositeRows(prv, last - 1).forEach(function (r) { prevPos[r.m] = r.pos; });
+    var maxScore = 0;
+    rows.forEach(function (r) { if (r.score !== null && r.score > maxScore) maxScore = r.score; });
+
+    var h = '<div class="sec"><h2>現在順位（エール投票順位＋フォロワー順位）</h2>' +
+            '<span class="note">点数が少ない人が上位</span></div>';
+    h += '<div class="tablewrap"><table class="rank">' +
+         '<colgroup><col style="width:56px"><col style="width:132px"><col><col style="width:84px">' +
+         '<col style="width:92px"><col style="width:92px"><col style="width:84px"></colgroup>' +
+         '<thead><tr><th class="lft">順位</th><th class="name">ファイナリスト</th><th class="lft">内訳（短いほど上位）</th>' +
+         '<th>合計点</th><th>エール</th><th>フォロワー</th><th>前回比</th></tr></thead><tbody>';
+    rows.forEach(function (r) {
+      var vw = r.vr !== null ? r.vr / 9 * 100 : 0, fw = r.fr !== null ? r.fr / 9 * 100 : 0;
+      var move = prevPos[r.m] !== undefined ? prevPos[r.m] - r.pos : null;
+      h += '<tr><td class="pos' + (r.pos <= 3 ? " medal" : "") + '">' + r.pos + "</td>" +
+        '<td class="name">' + esc(r.m) + "</td>" +
+        '<td class="detail"><div class="rbar" style="width:' + ((r.score || 0) / 18 * 100).toFixed(1) + '%">' +
+          '<span style="flex:' + (r.vr || 0) + '" data-tipv="' + (r.vr || "—") + ' 位" data-tipl="' + esc(r.m + "・エール投票") + '"></span>' +
+          '<span style="flex:' + (r.fr || 0) + '" data-tipv="' + (r.fr || "—") + ' 位" data-tipl="' + esc(r.m + "・フォロワー") + '"></span></div>' +
+          '<div class="rlegend">エール ' + (r.vr || "—") + " 位（" + nfmt(r.pt) + " PT）　・　フォロワー " + (r.fr || "—") + " 位（" + nfmt(r.ft) + "）</div></td>" +
+        '<td class="num">' + (r.score === null ? "—" : r.score) + "</td>" +
+        '<td class="pos">' + (r.vr || "—") + "</td>" +
+        '<td class="pos">' + (r.fr || "—") + "</td>" +
+        "<td>" + rankMove(move) + "</td></tr>";
+    });
+    h += "</tbody></table></div>";
+    h += '<p class="foot">エール投票の順位（1位＝1点、2位＝2点…）とフォロワー順位（上位3アカウント合計。最新の計測日 ' +
+         esc(dayLabel(state.days[last])) + '）を足した点数です。<b>点数が少ない人が上位</b>で、同点は同順位として並べ、表示順は エール投票→フォロワー の順位が良い方を先にしています。' +
+         '内訳バーは濃い方がエール、薄い方がフォロワーで、短いほど上位です。前回比は、直前の投票取得・前日のフォロワー計測との比較で、▲は上昇です。' +
+         'エール投票は ' + esc(cur.measuredAt.replace("T", " ")) + ' 時点。</p>';
+    return h;
+  }
+
+  /* ---------- エール投票ビュー ---------- */
+
+  var VKINDS = [
+    { key: "pt",   label: "合計" },
+    { key: "paid", label: "有料" },
+    { key: "free", label: "無料" }
+  ];
+  function vkLabel(k) { return (VKINDS.filter(function (x) { return x.key === k; })[0] || VKINDS[0]).label; }
+  /** その回の、指定した種類（合計・有料・無料）での順位 */
+  function kindRanks(v, list, k) {
+    var o = list.filter(function (m) { return v.ranks[m] && typeof v.ranks[m][k] === "number"; })
+                .sort(function (a, b) { return v.ranks[b][k] - v.ranks[a][k]; });
+    var r = {};
+    o.forEach(function (m, i) { r[m] = (i > 0 && v.ranks[m][k] === v.ranks[o[i - 1]][k]) ? r[o[i - 1]] : i + 1; });
+    return r;
+  }
+
+  function renderVoteView() {
+    var vs = state.votes;
+    if (!vs.length) return '<div class="empty">まだエール投票のデータがありません。</div>';
+    var cur = vs[vs.length - 1], prv = vs.length > 1 ? vs[vs.length - 2] : null;
+    var list = finalists().slice().sort(function (a, b) {
+      return ((cur.ranks[a] || {}).rank || 99) - ((cur.ranks[b] || {}).rank || 99);
+    });
+    if (list.indexOf(state.vperson) === -1) state.vperson = list[0];
+    if (!VKINDS.some(function (x) { return x.key === state.vkind; })) state.vkind = "pt";
+    var p = state.vperson, K = state.vkind;
+    var rPaid = kindRanks(cur, list, "paid"), rFree = kindRanks(cur, list, "free");
+    var maxPt = 0;
+    list.forEach(function (m) { var x = cur.ranks[m]; if (x && x.pt > maxPt) maxPt = x.pt; });
+    var topPt = maxPt;
+
+    var h = '<div class="sec"><h2>エール投票ランキング</h2><span class="note">' + esc(cur.measuredAt.replace("T", " ")) +
+            " 時点" + (prv ? "／前回 " + esc(prv.measuredAt.replace("T", " ")) : "") + '</span></div>';
+    h += '<div class="tablewrap"><table class="rank" style="min-width:860px">' +
+         '<colgroup><col style="width:52px"><col style="width:120px"><col><col style="width:100px">' +
+         '<col style="width:96px"><col style="width:120px"><col style="width:120px"><col style="width:66px"><col style="width:104px"></colgroup>' +
+         '<thead><tr><th class="lft">順位</th><th class="name">ファイナリスト</th><th class="lft">内訳（濃い＝有料・薄い＝無料）</th>' +
+         '<th>合計PT</th><th>前回比</th><th>有料PT</th><th>無料PT</th><th>順位</th><th>1位との差</th></tr></thead><tbody>';
+    list.forEach(function (m) {
+      var c = cur.ranks[m] || {}, o = prv && prv.ranks[m];
+      var w = (maxPt > 0 && c.pt) ? Math.max(c.pt / maxPt * 100, 1) : 0;
+      var paid = c.paid || 0, free = c.free || 0;
+      h += '<tr><td class="pos' + (c.rank && c.rank <= 3 ? " medal" : "") + '">' + (c.rank || "—") + "</td>" +
+        '<td class="name">' + esc(m) + "</td>" +
+        '<td class="barcell"><div class="vbar" style="width:' + w.toFixed(1) + '%">' +
+          '<span class="vp" style="flex:' + Math.max(paid, 0) + '" data-tipv="' + esc(nfmt(paid)) + '" data-tipl="' + esc(m + "・有料") + '"></span>' +
+          '<span class="vf" style="flex:' + Math.max(free, 0) + '" data-tipv="' + esc(nfmt(free)) + '" data-tipl="' + esc(m + "・無料") + '"></span>' +
+        "</div></td>" +
+        '<td class="num">' + nfmt(c.pt) + "</td>" +
+        "<td>" + deltaHTML(o ? c.pt - o.pt : null, "pill") + "</td>" +
+        '<td class="num" style="font-size:14px">' + nfmt(c.paid) + '<span class="ratio">' + (rPaid[m] || "—") + "位</span></td>" +
+        '<td class="num" style="font-size:14px">' + nfmt(c.free) + '<span class="ratio">' + (rFree[m] || "—") + "位</span></td>" +
+        "<td>" + rankMove(o ? o.rank - c.rank : null) + "</td>" +
+        "<td>" + (c.rank === 1 ? '<span class="delta flat">—</span>' : deltaHTML(c.pt - topPt)) + "</td></tr>";
+    });
+    h += "</tbody></table></div>";
+    h += '<div class="vlegend"><span><i></i>有料ポイント</span><span><i class="f"></i>無料ポイント</span>' +
+         '<span>有料PT・無料PTの横の「◯位」は、それぞれの種類だけで並べたときの順位</span></div>';
+
+    /* 個人の推移：合計・有料・無料を並べて（桁が違うので別々の目盛り） */
+    var stamps = vs.map(function (v) { return v.measuredAt; });
+    function seriesOf(k) { return vs.map(function (v) { var x = v.ranks[p]; return (x && typeof x[k] === "number") ? x[k] : null; }); }
+    h += '<div class="gap"></div><div class="sec"><h2>' + esc(p) + ' のポイント推移</h2><span class="note">' +
+         vs.length + ' 回の取得・グラフごとに目盛りが違います</span></div>';
+    h += '<div class="bar" id="vpbar">' + list.map(function (m) {
+      return '<button type="button" class="chip" data-m="' + esc(m) + '" aria-pressed="' + (m === p) + '">' + esc(m) + "</button>";
+    }).join("") + "</div>";
+    h += '<div class="mini three">';
+    VKINDS.forEach(function (kd) {
+      var sr = seriesOf(kd.key), now = sr[sr.length - 1], first = null;
+      for (var i = 0; i < sr.length; i++) if (sr[i] !== null) { first = sr[i]; break; }
+      h += '<div class="minicard"><div class="minihead"><span class="t">' + esc(kd.label) + '</span>' +
+           '<span class="v">' + nfmt(now) + "</span></div>" +
+           '<div class="minisub">' + (first !== null && now !== null ? "取得開始から " + deltaHTML(now - first) : "") + "</div>" +
+           lineChart(stamps, sr, { W: 340, H: 150, PL: 56, PR: 10, PT: 12, PB: 24, small: true, label: p + "・" + kd.label }) +
+           "</div>";
+    });
+    h += "</div>";
+
+    /* 全員の履歴（合計・有料・無料を切り替え） */
+    h += '<div class="sec" style="margin-top:8px"><h3>全員の履歴</h3><div class="chips-sm" id="vkbar"><span class="lab">表示</span>' +
+         VKINDS.map(function (kd) {
+           return '<button type="button" class="chip" data-k="' + kd.key + '" aria-pressed="' + (kd.key === K) + '">' + esc(kd.label) + "</button>";
+         }).join("") + "</div></div>";
+    h += '<details class="tbl" open><summary>' + esc(vkLabel(K)) + 'ポイントと、その種類での順位</summary><div class="tablewrap"><table style="min-width:' +
+         (120 + list.length * 118) + 'px"><thead><tr><th class="lft">取得日時</th>' +
+         list.map(function (m) { return "<th>" + esc(m) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+         vs.slice().reverse().map(function (v) {
+           var rr = K === "pt" ? null : kindRanks(v, list, K);
+           return '<tr><td class="lft">' + esc(dayLabel(v.measuredAt)) + "</td>" +
+             list.map(function (m) {
+               var x = v.ranks[m], val = x ? x[K] : null, rk = x ? (K === "pt" ? x.rank : rr[m]) : null;
+               return '<td class="num">' + (typeof val === "number" ? nfmt(val) + '<span class="ratio">' + rk + "位</span>" : "—") + "</td>";
+             }).join("") + "</tr>";
+         }).join("") + "</tbody></table></div></details>";
+    h += '<p class="foot">数字は YELL VOTE の公開ページから取得しています。有料・無料の内訳も同じページのデータ（有料ポイント／無料ポイント）で、合計＝有料＋無料です。' +
+         '取得するたびに記録が積み上がり、推移と履歴に残ります。前回比は直前の取得との差です。</p>';
+    return h;
+  }
+
+  /* ---------- ランキングビュー ---------- */
+
+  function renderRank() {
+    var days = state.days, last = lastIdx(), prev = last - 1;
+    var cd = cmpDef(), ago = agoIndex(cd.days);
+    var list = finalists();
+
+    if (!list.length) return '<div class="empty">ファイナリストが登録されていません。</div>';
+
+    var rows = list.map(function (m) {
+      var now = top3At(m, last);
+      var pv  = prev >= 0 ? top3At(m, prev) : null;
+      var av  = ago  >= 0 ? top3At(m, ago)  : null;
+      return {
+        m: m,
+        total: now ? now.total : null,
+        used: now ? now.used : [],
+        available: now ? now.available : 0,
+        day: (now && pv) ? now.total - pv.total : null,
+        gain: (now && av) ? now.total - av.total : null
+      };
+    });
+    rows.sort(function (a, b) { return (b.total === null ? -1 : b.total) - (a.total === null ? -1 : a.total); });
+
+    var max = 0;
+    rows.forEach(function (r) { if (r.total !== null && r.total > max) max = r.total; });
+
+    var h = '<div class="sec"><h2>上位3アカウント合計ランキング' +
+            (isLatest() ? "" : "（" + esc(dayLabel(days[last])) + "時点）") + '</h2>' +
+            '<span class="note">4つのうち多い方から3つを合計</span></div>';
+
+    h += '<div class="tablewrap"><table class="rank">' +
+         '<colgroup><col style="width:56px"><col style="width:132px"><col>' +
+         '<col style="width:116px"><col style="width:112px"><col style="width:120px"></colgroup>' +
+         '<thead><tr><th class="lft">順位</th><th class="name">ファイナリスト</th>' +
+         '<th class="lft">内訳（上位3アカウント）</th><th>合計</th><th>前日比</th><th>' +
+         esc(cd.label) + 'から</th></tr></thead><tbody>';
+
+    rows.forEach(function (r, i) {
+      var pos = i + 1;
+      var width = (max > 0 && r.total !== null) ? Math.max((r.total / max) * 100, 1) : 0;
+      var segs = r.used.map(function (o) {
+        return '<span style="flex:' + Math.max(o.v, 1) + '" data-tipv="' + esc(nfmt(o.v)) +
+               '" data-tipl="' + esc(r.m + "・" + PLABEL[o.k]) + '"></span>';
+      }).join("");
+      var legend = r.used.length
+        ? r.used.map(function (o) { return esc(PLABEL[o.k]) + " " + nfmt(o.v); }).join("　・　")
+        : "データなし";
+      if (r.used.length && r.available < 3) legend += "　（" + r.available + "アカウントのみ）";
+
+      h += '<tr>' +
+        '<td class="pos' + (pos <= 3 ? " medal" : "") + '">' + pos + "</td>" +
+        '<td class="name">' + esc(r.m) + "</td>" +
+        '<td class="detail"><div class="rbar" style="width:' + width.toFixed(1) + '%">' + segs + "</div>" +
+        '<div class="rlegend">' + legend + "</div></td>" +
+        '<td class="num">' + nfmt(r.total) + "</td>" +
+        "<td>" + deltaHTML(r.day, "pill") + "</td>" +
+        "<td>" + deltaHTML(r.gain) + "</td></tr>";
+    });
+    h += "</tbody></table></div>";
+
+    h += '<p class="foot">各ファイナリストの Instagram・Threads・TikTok・X のうち、' +
+         '<b>その日時点で多い方から3つ</b>を足した数字で並べています。' +
+         'アカウントが3つ未満の人は、ある分だけの合計です（内訳に件数を表示）。' +
+         '公式アカウントはこのランキングには含めていません。バーの長さは1位との比較、' +
+         '濃い順に1番目・2番目・3番目のアカウントです。</p>';
+    return h;
+  }
+
+  /* ---------- 個人ビュー ---------- */
+
+  function renderPerson() {
+    var list = finalists();
+    if (!list.length) return '<div class="empty">ファイナリストが登録されていません。</div>';
+    if (list.indexOf(state.person) === -1) state.person = list[0];
+    var p = state.person;
+
+    var days = state.days, last = lastIdx(), prev = last - 1;
+    var cd = cmpDef(), ago = agoIndex(cd.days);
+    var d0 = debutStart();
+    var vDays = days.slice(d0, last + 1);
+
+    var h = '<div class="bar" id="personbar">' + list.map(function (m) {
+      return '<button type="button" class="chip" data-m="' + esc(m) + '" aria-pressed="' + (m === p) + '">' +
+             esc(m) + "</button>";
+    }).join("") + "</div>";
+
+    /* 1) アカウント別の現在値（本人の中での比較なので、本人の最大値が目盛り） */
+    var acct = KEYS.map(function (k) {
+      var s = seriesFor(p, k), v = s.slice(d0, last + 1);
+      var now = s[last];
+      var first = firstKnown(v);
+      return {
+        k: k, s: s, v: v, now: now,
+        day: (now !== null && prev >= 0 && s[prev] !== null) ? now - s[prev] : null,
+        gain: (now !== null && ago >= 0 && s[ago] !== null) ? now - s[ago] : null,
+        since: (now !== null && first !== null) ? now - first : null,
+        ratio: (now !== null && first) ? now / first : null
+      };
+    });
+    var pmax = 0, ptotal = 0;
+    acct.forEach(function (a) { if (a.now !== null) { ptotal += a.now; if (a.now > pmax) pmax = a.now; } });
+
+    h += '<div class="who">' + esc(p) + '</div>' +
+         '<p class="note" style="margin:0 0 14px">4アカウント合計 <b class="num" style="font-size:15px">' +
+         nfmt(ptotal) + "</b>　／　お披露目（" + esc(dayLabel(DEBUT)) + "）からの推移</p>";
+
+    h += '<div class="sec"><h3>アカウント別（' + esc(nowLabel()) + '）</h3><span class="note">バーの長さは本人の中での比較</span></div>';
+    h += '<div class="tablewrap"><table class="acct">' +
+         '<colgroup><col style="width:108px"><col><col style="width:96px"><col style="width:104px"><col style="width:112px"><col style="width:150px"></colgroup>' +
+         '<thead><tr><th class="name">アカウント</th><th></th><th>' + esc(nowLabel()) + '</th><th>前日比</th><th>' +
+         esc(cd.label) + 'から</th><th>お披露目から</th></tr></thead><tbody>';
+    acct.forEach(function (a) {
+      var w = (pmax > 0 && a.now !== null) ? Math.max(a.now / pmax * 100, 1) : 0;
+      h += '<tr><td class="name">' + esc(PLABEL[a.k]) + "</td>" +
+           '<td class="barcell">' + (a.now === null ? '<span class="note">アカウントなし</span>' : a.now <= 0 ? "" :
+             '<div class="hbar" style="width:' + w.toFixed(1) + '%" data-tipv="' + esc(nfmt(a.now)) +
+             '" data-tipl="' + esc(p + "・" + PLABEL[a.k]) + '"></div>') + "</td>" +
+           '<td class="num">' + nfmt(a.now) + "</td>" +
+           "<td>" + deltaHTML(a.day, "pill") + "</td>" +
+           "<td>" + deltaHTML(a.gain) + "</td>" +
+           "<td>" + deltaHTML(a.since) +
+             (a.ratio !== null ? '<span class="ratio">×' + a.ratio.toFixed(1) + "</span>" : "") + "</td></tr>";
+    });
+    h += "</tbody></table></div>";
+
+    /* 2) お披露目からの推移。桁が違うので1枚に重ねず、アカウントごとに4枚 */
+    h += '<div class="gap"></div><div class="sec"><h3>お披露目からの推移</h3>' +
+         '<span class="note">アカウントごとに目盛りが違います</span></div>';
+    h += '<div class="mini">';
+    acct.forEach(function (a) {
+      h += '<div class="minicard"><div class="minihead"><span class="t">' + esc(PLABEL[a.k]) + '</span>' +
+           '<span class="v">' + nfmt(a.now) + "</span></div>" +
+           '<div class="minisub">' + (a.since === null ? "" :
+             "お披露目から " + deltaHTML(a.since) +
+             (a.ratio !== null ? '<span class="ratio">×' + a.ratio.toFixed(1) + "</span>" : "")) + "</div>" +
+           lineChart(vDays, a.v, { W: 340, H: 150, PL: 48, PR: 10, PT: 12, PB: 24, small: true, label: p + "・" + PLABEL[a.k] }) +
+           "</div>";
+    });
+    h += "</div>";
+    h += '<details class="tbl"><summary>数値を表で見る</summary><div class="tablewrap"><table>' +
+         '<thead><tr><th class="lft">日付</th>' + KEYS.map(function (k) { return "<th>" + esc(PLABEL[k]) + "</th>"; }).join("") +
+         "</tr></thead><tbody>" +
+         vDays.map(function (d, i) {
+           return '<tr><td class="lft">' + esc(dayLabel(d)) + "</td>" +
+             acct.map(function (a) { return '<td class="num">' + nfmt(a.v[i]) + "</td>"; }).join("") + "</tr>";
+         }).reverse().join("") + "</tbody></table></div></details>";
+
+    /* 3) 全員のアカウント構成。見比べるので全員同じ目盛り */
+    var gmax = 0;
+    list.forEach(function (m) {
+      KEYS.forEach(function (k) { var v = seriesFor(m, k)[last]; if (v !== null && v > gmax) gmax = v; });
+    });
+    h += '<div class="sec"><h3>全員のアカウント構成</h3><span class="note">全員同じ目盛り・押すとその人を表示</span></div>';
+    h += '<div class="grid" id="grid">';
+    list.forEach(function (m) {
+      var tot = 0;
+      var rows = KEYS.map(function (k) {
+        var v = seriesFor(m, k)[last];
+        if (v !== null) tot += v;
+        var w = (gmax > 0 && v !== null) ? Math.max(v / gmax * 100, 0.8) : 0;
+        return '<div class="crow"><span class="l">' + esc(PLABEL[k]) + '</span>' +
+               '<span>' + (v === null || v <= 0 ? "" : '<span class="b" style="display:block;width:' + w.toFixed(1) + '%" data-tipv="' +
+                 esc(nfmt(v)) + '" data-tipl="' + esc(m + "・" + PLABEL[k]) + '"></span>') + "</span>" +
+               '<span class="n">' + nfmt(v) + "</span></div>";
+      }).join("");
+      h += '<button type="button" class="card" data-m="' + esc(m) + '" aria-pressed="' + (m === p) + '">' +
+           '<div class="cn">' + esc(m) + "<span>" + nfmt(tot) + "</span></div>" + rows + "</button>";
+    });
+    h += "</div>";
+
+    h += '<p class="foot">「お披露目から」は、お披露目（' + esc(dayLabel(DEBUT)) + '）のあと各アカウントで最初に計測した数字からの増加です。' +
+         '×は何倍になったか。4つの推移グラフはアカウントごとに目盛りが違うので、線の傾きを比べるのではなく、それぞれの伸び方を見てください。' +
+         'グラフは触る（またはタブで選んで←→）と日ごとの数字が出ます。</p>';
+    return h;
+  }
+
+  /* ---------- main render ---------- */
+
+  function render() {
+    if (!state.ready) { panel.innerHTML = '<div class="empty">読み込み中…</div>'; return; }
+    if (state.error) { panel.innerHTML = '<div class="banner">' + esc(state.error) + "</div>"; return; }
+    if (!state.snaps.length || !members().length) {
+      panel.innerHTML = '<div class="empty">まだ計測データがありません。</div>';
+      return;
+    }
+    hideTip();
+    charts = {};
+    if (state.section === "follower") renderStrip(); else renderVoteStrip();
+    if (!SECTIONS.some(function (x) { return x.key === state.section; })) state.section = "total";
+
+    if (!VIEWS.some(function (v) { return v.key === state.view; })) state.view = "trend";
+
+    var fol = state.section === "follower";
+    var h = '<div class="topbar"><div class="chips" id="sectbar">' + SECTIONS.map(function (x) {
+      return '<button type="button" class="chip" data-s="' + x.key + '" aria-pressed="' +
+             (x.key === state.section) + '" style="font-size:15px;padding:7px 18px">' + esc(x.label) + "</button>";
+    }).join("") + "</div></div>";
+
+    if (fol) {
+      h += '<div class="topbar"><div class="chips" id="viewbar">' + VIEWS.map(function (v) {
+        return '<button type="button" class="chip" data-v="' + v.key + '" aria-pressed="' +
+               (v.key === state.view) + '">' + esc(v.label) + "</button>";
+      }).join("") + '</div><div class="chips-sm"><label class="lab" for="asofSel">基準日</label>' +
+        '<select class="sel" id="asofSel">' + dayOptions(0, state.days.length - 1, isLatest() ? "" : state.days[lastIdx()], true) +
+        '</select></div><div class="chips-sm" id="cmpbar"><span class="lab">比較</span>' +
+        CMPS.map(function (c) {
+          return '<button type="button" class="chip" data-c="' + c.key + '" aria-pressed="' +
+                 (c.key === state.cmp) + '">' + esc(c.label) + "</button>";
+        }).join("") + "</div></div>";
+
+      if (!isLatest()) {
+        h += '<div class="asofnote"><span><b>' + esc(dayLabel(state.days[lastIdx()])) +
+             ' 時点</b>の数字を表示中。前日比と比較もこの日が基準です。</span>' +
+             '<button type="button" class="linkbtn" id="resetAsof">最新に戻す</button></div>';
+      }
+    }
+
+    if (state.section === "total") h += renderTotal();
+    else if (state.section === "vote") h += renderVoteView();
+    else if (state.view === "rank") h += renderRank();
+    else if (state.view === "person") h += renderPerson();
+    else h += renderTrend();
+    panel.innerHTML = h;
+
+    bind("sectbar", "s", "section");
+    bind("vpbar", "m", "vperson");
+    bind("vkbar", "k", "vkind");
+    bind("viewbar", "v", "view");
+    bind("cmpbar", "c", "cmp");
+    bind("rangebar", "r", "range");
+    bind("platbar", "p", "platform");
+    bind("personbar", "m", "person");
+    bind("grid", "m", "person");
+    bindSel("asofSel", "asof");
+    bindSel("toSel", "asof");
+    bindSel("fromSel", "from");
+    var rb = document.getElementById("resetAsof");
+    if (rb) rb.addEventListener("click", function () { state.asof = ""; render(); });
+    attachHovers();
+  }
+
+  function bind(id, attr, field) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-" + attr + "]");
+      if (!b || !el.contains(b)) return;
+      state[field] = b.getAttribute("data-" + attr);
+      savePrefs();
+      render();
+    });
+  }
+
+  function bindSel(id, field) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("change", function () {
+      state[field] = el.value;
+      render();
+    });
+  }
+
+  function reindex() {
+    state.snaps.sort(function (a, b) { return a.measuredAt < b.measuredAt ? -1 : 1; });
+    state.cache = {};
+    state.byDay = {};
+    state.days = [];
+    state.snaps.forEach(function (s) {
+      var d = dayOf(s.measuredAt);
+      if (!state.byDay[d]) { state.byDay[d] = []; state.days.push(d); }
+      state.byDay[d].push(s);
+    });
+    state.days.sort();
+  }
+
+  window.addEventListener("scroll", hideTip, { passive: true });
+
+  /* ---------- boot ---------- */
+
+  state.byDay = {}; state.days = [];
+  render();
+
+  /* ---------- データ読み込み（GitHub Pages 版：同じフォルダの data.json） ---------- */
+  fetch("data.json?v=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (d) {
+      state.config = d.config || { members: [] };
+      state.snaps = (d.snapshots || []).map(function (v) {
+        return { measuredAt: v.measuredAt || "", label: v.label || "", values: v.values || {} };
+      });
+      state.votes = (d.votes || []).map(function (v) {
+        return { measuredAt: v.measuredAt || "", ranks: v.ranks || {} };
+      });
+      reindex();
+      var up = document.getElementById("updated");
+      if (up && d.generatedAt) up.textContent = "最終更新 " + d.generatedAt.replace("T", " ");
+      state.ready = true;
+      render();
+    })
+    .catch(function () {
+      state.ready = true;
+      state.error = "データを読み込めませんでした。時間をおいて再読み込みしてください。";
+      render();
+    });
+})();
+</script>
+</body>
+</html>
