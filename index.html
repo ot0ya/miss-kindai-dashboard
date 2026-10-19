@@ -266,6 +266,13 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
     { key: "vote",     label: "エール投票" },
     { key: "follower", label: "フォロワー" }
   ];
+  /* エール投票の期間外は「現在順位」「エール投票」を隠す。次のエール投票が始まったら true に戻す */
+  var SHOW_VOTE = false;
+  if (!SHOW_VOTE) {
+    SECTIONS = SECTIONS.filter(function (x) { return x.key === "follower"; });
+    var orgEl = document.querySelector(".masthead .org");
+    if (orgEl) orgEl.textContent = "ミス近畿大学 2026 ファイナリスト ／ SNSフォロワー";
+  }
   var VOTE_END = "2026-10-13";
   var RANGES = [
     { key: "3d",  label: "3日",   days: 3 },
@@ -1161,13 +1168,13 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
     }
     hideTip();
     charts = {};
+    if (!SECTIONS.some(function (x) { return x.key === state.section; })) state.section = SECTIONS[0].key;
     if (state.section === "follower") renderStrip(); else renderVoteStrip();
-    if (!SECTIONS.some(function (x) { return x.key === state.section; })) state.section = "total";
 
     if (!VIEWS.some(function (v) { return v.key === state.view; })) state.view = "trend";
 
     var fol = state.section === "follower";
-    var h = '<div class="topbar"><div class="chips" id="sectbar">' + SECTIONS.map(function (x) {
+    var h = SECTIONS.length < 2 ? "" : '<div class="topbar"><div class="chips" id="sectbar">' + SECTIONS.map(function (x) {
       return '<button type="button" class="chip" data-s="' + x.key + '" aria-pressed="' +
              (x.key === state.section) + '" style="font-size:15px;padding:7px 18px">' + esc(x.label) + "</button>";
     }).join("") + "</div></div>";
