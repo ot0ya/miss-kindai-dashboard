@@ -1,13 +1,16 @@
 """マスタースプシ（xlsx書き出し）の実測ログと、ダッシュボードの既存 snapshots を突き合わせ、
 新規・変更のスナップショットだけを outdir に JSON で書き出す。
-使い方: python3 -I sync_diff.py <download_file_contentの保存JSON> <既存snapshotsフォルダ> <outdir>"""
+使い方: python3 -I sync_diff.py <download_file_contentの保存ファイル(.xlsx または JSON)> <既存snapshotsフォルダ> <outdir>"""
 import json, base64, zipfile, io, re, sys, os
 from datetime import datetime, timedelta
 import xml.etree.ElementTree as ET
 
 src, existing, outdir = sys.argv[1], sys.argv[2], sys.argv[3]
-d = json.load(open(src))
-z = zipfile.ZipFile(io.BytesIO(base64.b64decode(d["content"])))
+if src.endswith(".xlsx"):  # Drive コネクタが xlsx をそのまま保存する場合
+    z = zipfile.ZipFile(src)
+else:  # {content: base64} の JSON で保存される場合
+    d = json.load(open(src))
+    z = zipfile.ZipFile(io.BytesIO(base64.b64decode(d["content"])))
 ns = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
       "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships"}
 wb = ET.fromstring(z.read("xl/workbook.xml"))
