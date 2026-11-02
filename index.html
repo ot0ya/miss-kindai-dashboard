@@ -165,6 +165,8 @@ tbody tr:hover td{background:var(--surface-2)}
 .empty{padding:44px 16px;text-align:center;color:var(--muted);font-size:15px}
 .banner{border:1px solid var(--line-strong);border-left:4px solid var(--accent);background:var(--accent-soft);
   border-radius:4px;padding:12px 15px;font-size:14px;margin:0 20px 18px}
+.dropped{display:inline-block;margin-left:6px;padding:0 5px;border:1px solid var(--line);border-radius:4px;font-size:11px;font-weight:600;color:var(--faint);line-height:16px;vertical-align:1px}
+tr.out td:not(.name),button.card.out .crow{opacity:.55}
 .foot{font-size:12.5px;color:var(--faint);margin:14px 2px 0}
 
 /* horizontal bars: 1色・細い・先端だけ丸める */
@@ -273,6 +275,8 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
     var orgEl = document.querySelector(".masthead .org");
     if (orgEl) orgEl.textContent = "ミス近畿大学 2026 ファイナリスト ／ SNSフォロワー";
   }
+  /* 脱落したファイナリスト（名前: 脱落日）。表示は残し「脱落」を付けて一番下に回す。順位には数えない */
+  var DROPPED = { "仲子和里": "11/2" };
   var VOTE_END = "2026-10-13";
   var RANGES = [
     { key: "3d",  label: "3日",   days: 3 },
@@ -323,7 +327,18 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
   }
   /** 公式アカウントを除いた、競い合う対象 */
   function finalists() {
-    return members().filter(function (m) { return m.indexOf("公式") !== 0; });
+    var all = members().filter(function (m) { return m.indexOf("公式") !== 0; });
+    return all.filter(function (m) { return !isDropped(m); }).concat(all.filter(isDropped));
+  }
+  /** 脱落者を除いた、順位をつける対象 */
+  function contenders() {
+    return finalists().filter(function (m) { return !isDropped(m); });
+  }
+  function isDropped(m) { return Object.prototype.hasOwnProperty.call(DROPPED, m); }
+  /** 脱落者を後ろへ回す比較（並べ替えの最初に使う） */
+  function dropLast(a, b) { return (isDropped(a) ? 1 : 0) - (isDropped(b) ? 1 : 0); }
+  function nameHTML(m) {
+    return esc(m) + (isDropped(m) ? '<span class="dropped" title="' + esc(DROPPED[m]) + ' 脱落">脱落</span>' : "");
   }
   function dayOf(measuredAt) { return String(measuredAt || "").slice(0, 10); }
   function dayLabel(d) {
@@ -747,7 +762,7 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
         period: (now !== null && fv !== null && s0 < last) ? now - fv : null
       };
     });
-    rows.sort(function (a, b) { return (b.now === null ? -1 : b.now) - (a.now === null ? -1 : a.now); });
+    rows.sort(function (a, b) { return dropLast(a.m, b.m) || (b.now === null ? -1 : b.now) - (a.now === null ? -1 : a.now); });
 
     h += '<div class="sec"><h2>アカウント別</h2><span class="note">' + esc(nowLabel()) + 'の数字が多い順</span></div>';
     h += '<div class="tablewrap"><table' + (custom ? ' style="min-width:740px"' : "") + '>' +
@@ -757,7 +772,7 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
          esc(cd.label) + 'から</th>' + (custom ? "<th>" + esc(dayLabel(days[s0])) + "から</th>" : "") +
          '</tr></thead><tbody>';
     rows.forEach(function (r) {
-      h += '<tr><td class="name">' + esc(r.m) + "</td>" +
+      h += '<tr' + (isDropped(r.m) ? ' class="out"' : "") + '><td class="name">' + nameHTML(r.m) + "</td>" +
            '<td class="spark">' + sparkline(r.s.slice(s0, last + 1)) + "</td>" +
            '<td class="num">' + nfmt(r.now) + "</td>" +
            "<td>" + deltaHTML(r.day, "pill") + "</td>" +
@@ -781,7 +796,7 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
 
   /** idx 日時点のフォロワー順位（上位3アカウント合計）。{name: 順位} */
   function followerRanks(idx) {
-    var rows = finalists().map(function (m) {
+    var rows = contenders().map(function (m) {
       var t = top3At(m, idx);
       return { m: m, total: t ? t.total : null };
     });
@@ -794,7 +809,7 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
   /** 総合：エール順位＋フォロワー順位の合計。少ない人が上位。同点は同順位 */
   function compositeRows(vote, idx) {
     var fr = followerRanks(idx);
-    var rows = finalists().map(function (m) {
+    var rows = contenders().map(function (m) {
       var v = vote && vote.ranks[m], f = fr[m];
       var vr = v ? v.rank : null, fp = f ? f.pos : null;
       return { m: m, vr: vr, fr: fp, score: (vr !== null && fp !== null) ? vr + fp : null,
@@ -822,7 +837,7 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
     var last = state.days.length - 1;
     var comp = compositeRows(cur, last);
     var top = comp[0];
-    var vtop = finalists().slice().sort(function (a, b) {
+    var vtop = contenders().slice().sort(function (a, b) {
       return ((cur.ranks[a] || {}).rank || 99) - ((cur.ranks[b] || {}).rank || 99);
     })[0];
     var t = new Date(VOTE_END + "T23:59:59"), left = Math.ceil((t - new Date()) / 86400000);
@@ -900,7 +915,7 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
     var vs = state.votes;
     if (!vs.length) return '<div class="empty">まだエール投票のデータがありません。</div>';
     var cur = vs[vs.length - 1], prv = vs.length > 1 ? vs[vs.length - 2] : null;
-    var list = finalists().slice().sort(function (a, b) {
+    var list = contenders().slice().sort(function (a, b) {
       return ((cur.ranks[a] || {}).rank || 99) - ((cur.ranks[b] || {}).rank || 99);
     });
     if (list.indexOf(state.vperson) === -1) state.vperson = list[0];
@@ -1002,7 +1017,7 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
         gain: (now && av) ? now.total - av.total : null
       };
     });
-    rows.sort(function (a, b) { return (b.total === null ? -1 : b.total) - (a.total === null ? -1 : a.total); });
+    rows.sort(function (a, b) { return dropLast(a.m, b.m) || (b.total === null ? -1 : b.total) - (a.total === null ? -1 : a.total); });
 
     var max = 0;
     rows.forEach(function (r) { if (r.total !== null && r.total > max) max = r.total; });
@@ -1019,7 +1034,7 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
          esc(cd.label) + 'から</th></tr></thead><tbody>';
 
     rows.forEach(function (r, i) {
-      var pos = i + 1;
+      var out = isDropped(r.m), pos = out ? "—" : i + 1;
       var width = (max > 0 && r.total !== null) ? Math.max((r.total / max) * 100, 1) : 0;
       var segs = r.used.map(function (o) {
         return '<span style="flex:' + Math.max(o.v, 1) + '" data-tipv="' + esc(nfmt(o.v)) +
@@ -1030,9 +1045,9 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
         : "データなし";
       if (r.used.length && r.available < 3) legend += "　（" + r.available + "アカウントのみ）";
 
-      h += '<tr>' +
-        '<td class="pos' + (pos <= 3 ? " medal" : "") + '">' + pos + "</td>" +
-        '<td class="name">' + esc(r.m) + "</td>" +
+      h += '<tr' + (out ? ' class="out"' : "") + '>' +
+        '<td class="pos' + (!out && pos <= 3 ? " medal" : "") + '">' + pos + "</td>" +
+        '<td class="name">' + nameHTML(r.m) + "</td>" +
         '<td class="detail"><div class="rbar" style="width:' + width.toFixed(1) + '%">' + segs + "</div>" +
         '<div class="rlegend">' + legend + "</div></td>" +
         '<td class="num">' + nfmt(r.total) + "</td>" +
@@ -1044,7 +1059,7 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
     h += '<p class="foot">各ファイナリストの Instagram・Threads・TikTok・X のうち、' +
          '<b>その日時点で多い方から3つ</b>を足した数字で並べています。' +
          'アカウントが3つ未満の人は、ある分だけの合計です（内訳に件数を表示）。' +
-         '公式アカウントはこのランキングには含めていません。バーの長さは1位との比較、' +
+         '公式アカウントはこのランキングには含めていません。「脱落」の人は順位をつけず一番下に表示しています。バーの長さは1位との比較、' +
          '濃い順に1番目・2番目・3番目のアカウントです。</p>';
     return h;
   }
@@ -1064,7 +1079,7 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
 
     var h = '<div class="bar" id="personbar">' + list.map(function (m) {
       return '<button type="button" class="chip" data-m="' + esc(m) + '" aria-pressed="' + (m === p) + '">' +
-             esc(m) + "</button>";
+             nameHTML(m) + "</button>";
     }).join("") + "</div>";
 
     /* 1) アカウント別の現在値（本人の中での比較なので、本人の最大値が目盛り） */
@@ -1083,7 +1098,7 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
     var pmax = 0, ptotal = 0;
     acct.forEach(function (a) { if (a.now !== null) { ptotal += a.now; if (a.now > pmax) pmax = a.now; } });
 
-    h += '<div class="who">' + esc(p) + '</div>' +
+    h += '<div class="who">' + nameHTML(p) + '</div>' +
          '<p class="note" style="margin:0 0 14px">4アカウント合計 <b class="num" style="font-size:15px">' +
          nfmt(ptotal) + "</b>　／　お披露目（" + esc(dayLabel(DEBUT)) + "）からの推移</p>";
 
@@ -1146,8 +1161,8 @@ details.tbl td,details.tbl th{padding:6px 10px;font-size:13px}
                  esc(nfmt(v)) + '" data-tipl="' + esc(m + "・" + PLABEL[k]) + '"></span>') + "</span>" +
                '<span class="n">' + nfmt(v) + "</span></div>";
       }).join("");
-      h += '<button type="button" class="card" data-m="' + esc(m) + '" aria-pressed="' + (m === p) + '">' +
-           '<div class="cn">' + esc(m) + "<span>" + nfmt(tot) + "</span></div>" + rows + "</button>";
+      h += '<button type="button" class="card' + (isDropped(m) ? " out" : "") + '" data-m="' + esc(m) + '" aria-pressed="' + (m === p) + '">' +
+           '<div class="cn">' + nameHTML(m) + "<span>" + nfmt(tot) + "</span></div>" + rows + "</button>";
     });
     h += "</div>";
 
