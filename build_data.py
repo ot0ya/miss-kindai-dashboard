@@ -35,7 +35,7 @@ for f in sorted(glob.glob(os.path.join(EXP, "votes", "*.json"))):
     ranks = {m: {k: r[k] for k in ("pt", "paid", "free", "rank") if k in r}
              for m, r in (d.get("ranks") or {}).items() if m in MEMBERS}
     if d.get("measuredAt") and ranks:
-        votes.append({"measuredAt": d["measuredAt"], "ranks": ranks})
+        votes.append({"measuredAt": d["measuredAt"], "ranks": ranks, "phase": d.get("phase", "before")})
 
 snaps.sort(key=lambda s: s["measuredAt"])
 votes.sort(key=lambda v: v["measuredAt"])
